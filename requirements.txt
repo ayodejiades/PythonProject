@@ -7,7 +7,7 @@ requests
 aiofiles
 langchain==0.2.16
 langchain-community==0.2.16
-langchain-google-genai==1.0.10
+langchain-google-genai
 chromadb
 langchain-chroma==0.1.4
 langchain-text-splitters==0.2.4
