@@ -79,20 +79,23 @@ async def startup_check():
     required_vars = ["TELEGRAM_BOT_TOKEN", "GEMINI_API_KEY", "GROQ_API_KEY"]
     missing = [var for var in required_vars if not os.getenv(var)]
     if missing:
-        print(f"WARNING: Missing environment variables: {', '.join(missing)}")
+        print(f"CRITICAL: Missing environment variables: {', '.join(missing)}")
     else:
-        print("Ayodeji (Telegram Edition) is ready!")
-    
-    # Initialize the PTB application
+        print("Ayodeji is ready!")
+        print(f"Token present: {bool(TOKEN)}")
+        print(f"Webhook URL: {WEBHOOK_URL}")
+
     await ptb_app.initialize()
     await ptb_app.start()
     
-    # Set Webhook if URL is provided (Simplifies deployment)
     if WEBHOOK_URL and TOKEN:
         webhook_endpoint = f"{WEBHOOK_URL}/webhook"
-        print(f"Setting webhook to: {webhook_endpoint}")
-        await ptb_app.bot.set_webhook(webhook_endpoint) 
-        # Note: setting webhook is often better done manually or once, but here helps auto-config.
+        print(f"Attempting to set webhook to: {webhook_endpoint}")
+        try:
+            await ptb_app.bot.set_webhook(webhook_endpoint)
+            print("Webhook set successfully!")
+        except Exception as e:
+            print(f"Failed to set webhook: {e}")
 
 @app.on_event("shutdown")
 async def shutdown():
@@ -110,11 +113,14 @@ async def telegram_webhook(request: Request):
     """
     try:
         data = await request.json()
+        print(f"Received Webhook Data: {data}") # DEBUG LOG
         update = Update.de_json(data, ptb_app.bot)
         await ptb_app.process_update(update)
         return {"status": "ok"}
     except Exception as e:
         print(f"Error handling update: {e}")
+        import traceback
+        traceback.print_exc()
         return {"status": "error"}
 
 if __name__ == "__main__":
