@@ -81,8 +81,15 @@ def ask_ayodeji(query: str) -> str:
             chain_type_kwargs={"prompt": QA_CHAIN_PROMPT}
         )
         
-        result = qa_chain.invoke({"query": query})
-        return result["result"]
+        try:
+            result = qa_chain.invoke({"query": query})
+            return result["result"]
+        except Exception as e:
+            print(f"RAG failed (likely embedding quota): {e}. Falling back to pure LLM.")
+            # Fallback: Just ask the LLM without context
+            fallback_prompt = template.replace("{context}", "No external context available (Quota exhausted).").replace("{question}", query)
+            response = llm.invoke(fallback_prompt)
+            return response.content
         
     except Exception as e:
         print(f"Error in ask_ayodeji: {e}")
