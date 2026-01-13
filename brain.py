@@ -15,7 +15,7 @@ os.makedirs(PERSIST_DIRECTORY, exist_ok=True)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004", google_api_key=GEMINI_API_KEY)
-llm = ChatGoogleGenerativeAI(model="gemini-pro", google_api_key=GEMINI_API_KEY, temperature=0.7)
+llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=GEMINI_API_KEY, temperature=0.7)
 
 # Initialize Chroma Vector Store
 vector_store = Chroma(
