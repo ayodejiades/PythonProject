@@ -86,4 +86,6 @@ def ask_ayodeji(query: str) -> str:
         
     except Exception as e:
         print(f"Error in ask_ayodeji: {e}")
+        import traceback
+        traceback.print_exc()
         return "My brain dey network failure small. Ask me again."
