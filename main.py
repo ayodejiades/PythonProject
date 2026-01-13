@@ -9,15 +9,10 @@ from brain import ask_ayodeji, digest_pdf
 
 # Constants
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-WEBHOOK_URL = os.getenv("WEBHOOK_URL")  # e.g., https://ayodeji.onrender.com/webhook
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 
 app = FastAPI()
-
-# Initialize Telegram Application
-# We build it but don't run run_polling(). We handle updates manually in the webhook.
 ptb_app = ApplicationBuilder().token(TOKEN).build()
-
-# --- Telegram Handlers ---
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("How far! I be Ayodeji, your Course Rep. I dey hear English, Pidgin, Yoruba, Igbo, and Hausa. Send VN, PDF, or just ask question.")
@@ -32,19 +27,13 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(response)
 
 async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Telegram sends voice notes as "Voice" object
     voice = update.message.voice
     file_id = voice.file_id
-    
-    # Download file (PTB makes this easy)
     new_file = await context.bot.get_file(file_id)
-    
     with tempfile.NamedTemporaryFile(delete=False, suffix=".ogg") as tmp:
         tmp_path = tmp.name
-        
     await new_file.download_to_drive(tmp_path)
     
-    # Process
     try:
         text = process_audio(tmp_path)
         response = ask_ayodeji(text)
@@ -102,7 +91,7 @@ async def startup_check():
     if WEBHOOK_URL and TOKEN:
         webhook_endpoint = f"{WEBHOOK_URL}/webhook"
         print(f"Setting webhook to: {webhook_endpoint}")
-        # await ptb_app.bot.set_webhook(webhook_endpoint) 
+        await ptb_app.bot.set_webhook(webhook_endpoint) 
         # Note: setting webhook is often better done manually or once, but here helps auto-config.
 
 @app.on_event("shutdown")
